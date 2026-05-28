@@ -1,22 +1,71 @@
-# x402 SaaS Starter (Python / FastAPI)
+# x402 SaaS Starter
 
-Ship a paid downloadable artifact behind x402 micropayments on Base. No Stripe, no Lemon Squeezy — buyers pay USDC and receive a 24h signed download URL.
+**Analytics middleware + wallet attribution for x402 builders shipping on Base.**
 
-Three tiers ship pre-wired:
+Pay-per-download via x402 micropayments on Base. No Stripe, no Lemon Squeezy, no signup — buyers pay USDC and receive a 24h signed download URL.
 
-| tier | price | endpoint |
-|---|---|---|
-| intro | $49 USDC | `GET /buy/intro` |
-| std | $99 USDC | `GET /buy/std` |
-| pro | $199 USDC | `GET /buy/pro` |
-
-Payments settle to a single EVM wallet on Base (default: `0xd779cE46567d21b9918F24f0640cA5Ad6058C893`).
+This repo is the MIT core. Three paid tiers ship the production glue on top.
 
 ---
 
-## Quick deploy
+## Buy a tier
 
-### Local
+| tier | price | what you get |
+|---|---|---|
+| **[Intro](https://api.smartflowproai.com/k)** | $49 USDC | analytics middleware + wallet attribution + 14-day email support |
+| **[Standard](https://api.smartflowproai.com/k)** | $99 USDC | Intro + multi-endpoint router + reconciliation log + EVM cross-chain (Base/OP/Arb) + 30-day support |
+| **[Pro](https://api.smartflowproai.com/k)** | $199 USDC | Standard + 3 MCP server templates (agent-facing analytics) + private Discord + 90-day premium support |
+
+→ **Buy at [api.smartflowproai.com/k](https://api.smartflowproai.com/k)** — pay USDC on Base, get the kit by signed URL.
+
+48h no-questions refund. USDC returned to your buying wallet.
+
+---
+
+## What you get (concretely)
+
+**Intro tier ($49 USDC)** ships a 13KB zip with:
+- `src/analytics_middleware.py` — FastAPI middleware that logs every x402 payment event to SQLite (190+ LOC, working code, not vapor)
+- `src/wallet_attribution.py` — Parse `X-PAYMENT` header → buyer wallet → per-wallet history
+- `examples/dashboard_view.sql` — 7 pre-built SQL queries (top-payer leaderboard, conversion funnel, per-tier revenue, repeat-buyer signals, etc.)
+- `examples/basic_usage.py` — 3 Python helpers you drop into a one-shot script or dashboard
+- `setup.md` — 15-minute walkthrough with troubleshooting
+- 14-day email support contract
+
+**Standard tier ($99 USDC)** adds (20KB zip):
+- `src/multi_endpoint_router.py` — Per-endpoint config + cross-chain wallet identity registry
+- `src/reconciliation_log.py` — Append-only payment log with cryptographic hash chain (tamper-evident; verification CLI included)
+- `src/evm_cross_chain.py` — Base + Optimism + Arbitrum USDC contract registry + decoding
+- 12 additional SQL queries (cohort retention, MRR proxy, churn windows, refund audit, tier upgrade paths)
+- 30-day email support
+
+**Pro tier ($199 USDC)** adds (24KB zip):
+- 3 working MCP server templates (~250 LOC each, TypeScript, built on official MCP SDK):
+  - `facilitator_analytics_server.ts` — wallet history, endpoint revenue, conversion funnel, revenue velocity
+  - `wallet_clustering_server.ts` — cross-chain identity, LTV ranking, suspicious patterns, fingerprint matching
+  - `reconciliation_dashboard_server.ts` — chain integrity verification, proof-of-payment, compliance reports
+- Claude Desktop registration walkthrough
+- Private Discord access (≤100 members)
+- Monthly office hours
+- 90-day premium support with free integration review
+
+---
+
+## Why x402 (not Stripe)
+
+This is a crypto product for crypto builders. Shipping it behind a fiat gateway felt wrong.
+
+- USDC on Base, full stop
+- On-chain receipts (Basescan visible)
+- Refunds return to the buying wallet
+- No signup, no KYC, no platform fees, no chargeback risk
+- 48h no-questions refund window
+
+If you're already shipping on x402 (Bankr, Dexter, Mogami) and you want visibility into your payment flows, this kit gets you there in one evening.
+
+---
+
+## Quick start (run the MIT core locally)
 
 ```bash
 git clone https://github.com/smartflowproai-lang/x402-saas-starter.git
@@ -26,8 +75,9 @@ python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
 cp .env.example .env
-# edit .env — set DOWNLOAD_SECRET to a long random string, CDP_API_KEY,
-# RECIPIENT_WALLET (defaults to Tom's pseudonym wallet)
+# edit .env — set DOWNLOAD_SECRET to a long random string,
+# RECIPIENT_WALLET to your EVM address on Base,
+# optionally CDP_API_KEY if using Coinbase Developer Platform facilitator
 
 mkdir -p assets
 # drop your paid artifacts as assets/intro.zip, assets/std.zip, assets/pro.zip
@@ -35,18 +85,21 @@ mkdir -p assets
 uvicorn server:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-### Docker
+Then `curl -i http://localhost:8000/buy/intro` returns a real x402 v0.5 challenge.
 
-```bash
-docker build -t x402-saas-starter .
-docker run --rm -p 8000:8000 \
-  -e DOWNLOAD_SECRET="$(openssl rand -hex 32)" \
-  -e CDP_API_KEY="your-cdp-key" \
-  -e RECIPIENT_WALLET=0xd779cE46567d21b9918F24f0640cA5Ad6058C893 \
-  -e PUBLIC_BASE_URL="https://your.domain" \
-  -v "$PWD/assets:/app/assets:ro" \
-  x402-saas-starter
+---
+
+## Architecture
+
 ```
+[buyer] ──GET /buy/intro──→ [server.py] ──402 challenge w/ x402 envelope──→ [buyer]
+[buyer] ──POST /download/intro w/ X-PAYMENT header──→ [server.py]
+[server.py] ──verify(payment)──→ [CDP facilitator OR self-hosted facilitator]
+[facilitator] ──valid──→ [server.py] ──signed 24h URL──→ [buyer]
+[buyer] ──GET /download/file/intro/<token>──→ [server.py] ──FileResponse(intro.zip)──→ [buyer]
+```
+
+Stateless beyond the assets directory + (optional) analytics.db. SQLite gives you full audit trail without operational ceremony.
 
 ---
 
@@ -55,7 +108,7 @@ docker run --rm -p 8000:8000 \
 | var | required | notes |
 |---|---|---|
 | `DOWNLOAD_SECRET` | yes | HMAC-SHA256 secret for signed URLs. Must NOT be `changeme`. |
-| `CDP_API_KEY` | for CDP mode | Bearer token sent to facilitator. Leave unset for self-hosted facilitator. |
+| `CDP_API_KEY` | for CDP mode | Bearer token for Coinbase Developer Platform facilitator. Leave unset for self-hosted facilitator. |
 | `RECIPIENT_WALLET` | yes | EVM address that receives USDC. 42 chars, `0x`-prefixed. |
 | `FACILITATOR_URL` | no | Defaults to `https://api.cdp.coinbase.com`. |
 | `USDC_ASSET_ADDRESS` | no | Defaults to Base USDC (`0x8335…2913`). |
@@ -65,85 +118,32 @@ docker run --rm -p 8000:8000 \
 
 ---
 
-## Manual smoke test
-
-### 1 — Fetch the 402 challenge
+## Docker
 
 ```bash
-curl -i http://localhost:8000/buy/intro
+docker build -t x402-saas-starter .
+docker run --rm -p 8000:8000 \
+  -e DOWNLOAD_SECRET="$(openssl rand -hex 32)" \
+  -e CDP_API_KEY="your-cdp-key" \
+  -e RECIPIENT_WALLET=0xYourWallet \
+  -e PUBLIC_BASE_URL="https://your.domain" \
+  -v "$PWD/assets:/app/assets:ro" \
+  x402-saas-starter
 ```
-
-Expected (truncated):
-
-```
-HTTP/1.1 402 Payment Required
-content-type: application/json
-payment-required: eyJ4NDAyVmVyc2lvbiI6MSwi...
-
-{
-  "x402Version": 1,
-  "error": "Payment required",
-  "accepts": [{
-    "scheme": "exact",
-    "network": "base",
-    "maxAmountRequired": "49000000",
-    "resource": "http://localhost:8000/buy/intro",
-    "description": "x402 SaaS Starter — Intro tier",
-    "mimeType": "",
-    "payTo": "0xd779cE46567d21b9918F24f0640cA5Ad6058C893",
-    "maxTimeoutSeconds": 300,
-    "asset": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
-    "extra": {"name": "USD Coin", "version": "2", "symbol": "USDC", "decimals": 6}
-  }]
-}
-```
-
-The 6-decimal USDC amount: intro = `49000000`, std = `99000000`, pro = `199000000`.
-
-### 2 — POST a payment
-
-Construct an x402 PAYMENT payload (EIP-3009 `transferWithAuthorization` signed by the buyer wallet), base64-encode the JSON, and POST:
-
-```bash
-PAYMENT_JSON='{"x402Version":1,"scheme":"exact","network":"base","payload":{"signature":"0x...","authorization":{"from":"0xBUYER","to":"0xd779cE46567d21b9918F24f0640cA5Ad6058C893","value":"49000000","validAfter":"0","validBefore":"9999999999","nonce":"0x..."}}}'
-PAYMENT=$(printf '%s' "$PAYMENT_JSON" | base64)
-
-curl -s -X POST http://localhost:8000/download/intro \
-  -H "X-PAYMENT: $PAYMENT" | jq
-```
-
-On verify success, response:
-
-```json
-{
-  "tier": "intro",
-  "download_url": "http://localhost:8000/download/file/intro/<token>",
-  "expires_at": 1746979200
-}
-```
-
-### 3 — Fetch the artifact
-
-```bash
-curl -O -J http://localhost:8000/download/file/intro/<token>
-```
-
-Token is single-use. A second GET returns `403 invalid or expired download token`.
 
 ---
 
-## Architecture
+## Manual smoke test
 
-```
-GET  /                  HTML landing (3 tier cards)
-GET  /buy/{tier}        → 402 + x402 v0.5 challenge (accepts[])
-POST /download/{tier}   x-payment header → CDP /verify → signed URL
-GET  /download/file/.../{token}  HMAC verify + consume + serve zip
+```bash
+curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8000/
+# 200 (landing)
+
+curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8000/buy/intro
+# 402 (x402 challenge)
 ```
 
-- `x402_middleware.py` — pydantic models for the challenge shape, base64 header codec, async CDP facilitator client (verify + settle).
-- `signed_url.py` — HMAC-SHA256 24h tokens, in-memory single-use nonce tracking (swap for Redis in prod).
-- `server.py` — FastAPI app, three tier routes, env validation, asset directory provisioning.
+For full smoke including post-payment download, see `tests/test_smoke.py` (20+ test cases).
 
 ---
 
@@ -151,13 +151,30 @@ GET  /download/file/.../{token}  HMAC verify + consume + serve zip
 
 ```bash
 pip install -r requirements.txt
-DOWNLOAD_SECRET=$(openssl rand -hex 16) \
-RECIPIENT_WALLET=0xd779cE46567d21b9918F24f0640cA5Ad6058C893 \
-pytest -q
+pytest tests/
 ```
 
 ---
 
 ## License
 
-MIT. Built by Tom Smart — [@tomsmart_ai](https://twitter.com/tomsmart_ai).
+MIT for the core (this repo). Paid tier bundles ship under MIT for code + restricted resale for docs/queries (see each tier's LICENSE).
+
+---
+
+## Built by
+
+**Tom Smart** — x402 observability operator
+- [@tomsmart_ai](https://twitter.com/TomSmart_ai) on X
+- [smartflowproai.substack.com](https://smartflowproai.substack.com) — weekly x402 observability writing
+- [@tomsmart-ai/mapper-mcp](https://www.npmjs.com/package/@tomsmart-ai/mapper-mcp) — sibling project, x402 endpoint catalog as MCP server
+
+If you're running an x402 catalog and want a paid audit of schema-drift + method-coverage against your data, intake is open week of 02.06 at [smartflowproai.com/work-with-me](https://smartflowproai.com/work-with-me).
+
+---
+
+## Build log
+
+| version | date | changes |
+|---|---|---|
+| 1.0.0 | 2026-05-28 | Initial release. Three tiers shipped. K main launch 14:00 CEST. |
