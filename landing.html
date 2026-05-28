@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>x402 SaaS Starter — pay USDC, get code</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Ship your first x402-monetized API in under 60 minutes. Production-tested middleware on Base. Pay with USDC, download instantly — no signup, no KYC.">
+  <meta property="og:title" content="x402 SaaS Starter">
+  <meta property="og:description" content="Ship your first x402-monetized API in under 60 minutes. USDC on Base. No signup.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://k.smartflowproai.com">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@TomSmart_ai">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0b;
+      --bg-elev: #131316;
+      --bg-card: #17171b;
+      --border: #26262c;
+      --border-strong: #34343c;
+      --text: #f5f5f7;
+      --text-dim: #a0a0aa;
+      --text-mute: #6a6a73;
+      --accent: #4f9eff;
+      --accent-soft: rgba(79, 158, 255, 0.12);
+      --success: #4ade80;
+      --warn: #fbbf24;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+
+    code, .mono { font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Monaco, monospace; }
+
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+    /* nav */
+    nav {
+      padding: 24px 0;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: rgba(10, 10, 11, 0.92);
+      backdrop-filter: blur(16px);
+      z-index: 50;
+    }
+    nav .wrap { display: flex; justify-content: space-between; align-items: center; }
+    .brand { font-weight: 700; font-size: 17px; letter-spacing: -0.01em; }
+    .brand .dot { color: var(--accent); }
+    .nav-links { display: flex; gap: 28px; }
+    .nav-links a { color: var(--text-dim); text-decoration: none; font-size: 14px; transition: color 0.15s; }
+    .nav-links a:hover { color: var(--text); }
+
+    /* hero */
+    .hero { padding: 96px 0 64px; text-align: center; }
+    .hero .pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 14px;
+      background: var(--accent-soft);
+      border: 1px solid rgba(79, 158, 255, 0.25);
+      border-radius: 999px;
+      font-size: 13px;
+      color: var(--accent);
+      margin-bottom: 28px;
+    }
+    .pill .live-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 8px var(--success);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+    .hero h1 {
+      font-size: clamp(34px, 5.5vw, 56px);
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      line-height: 1.08;
+      max-width: 820px;
+      margin: 0 auto 24px;
+    }
+    .hero h1 .grad {
+      background: linear-gradient(135deg, #f5f5f7 0%, #a0a0aa 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero .sub {
+      font-size: 19px;
+      color: var(--text-dim);
+      max-width: 640px;
+      margin: 0 auto 40px;
+    }
+
+    .cta-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 40px; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 13px 22px;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 500;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: all 0.15s;
+      cursor: pointer;
+      border: 1px solid transparent;
+    }
+    .btn-primary { background: var(--text); color: var(--bg); }
+    .btn-primary:hover { background: #fff; transform: translateY(-1px); }
+    .btn-ghost { background: transparent; color: var(--text); border-color: var(--border-strong); }
+    .btn-ghost:hover { border-color: var(--text-dim); }
+
+    .trust-row {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      flex-wrap: wrap;
+      color: var(--text-mute);
+      font-size: 13px;
+    }
+    .trust-row span { display: inline-flex; align-items: center; gap: 6px; }
+    .trust-row span::before { content: '·'; color: var(--border-strong); }
+    .trust-row span:first-child::before { display: none; }
+
+    /* sections */
+    section { padding: 80px 0; border-top: 1px solid var(--border); }
+    .section-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+    }
+    .section-sub { font-size: 17px; color: var(--text-dim); max-width: 620px; margin-bottom: 48px; }
+
+    /* pricing */
+    .tiers {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .tier {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 32px 28px;
+      display: flex;
+      flex-direction: column;
+      transition: border-color 0.15s, transform 0.15s;
+    }
+    .tier:hover { border-color: var(--border-strong); transform: translateY(-2px); }
+    .tier.featured { border-color: var(--accent); position: relative; }
+    .tier.featured::before {
+      content: 'most picked';
+      position: absolute;
+      top: -10px;
+      left: 28px;
+      background: var(--accent);
+      color: var(--bg);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 4px;
+      letter-spacing: 0.02em;
+    }
+    .tier-name { font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-dim); margin-bottom: 12px; }
+    .tier-price { font-size: 38px; font-weight: 700; letter-spacing: -0.02em; }
+    .tier-price .unit { font-size: 15px; font-weight: 500; color: var(--text-mute); margin-left: 4px; }
+    .tier-tag { font-size: 13px; color: var(--text-mute); margin-top: 4px; margin-bottom: 28px; }
+    .tier ul { list-style: none; margin-bottom: 28px; flex-grow: 1; }
+    .tier li {
+      padding: 8px 0;
+      font-size: 14px;
+      color: var(--text-dim);
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .tier li::before {
+      content: '';
+      width: 14px; height: 14px;
+      background: var(--accent-soft);
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 4px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath fill='%234f9eff' d='M5.7 9.4 3.3 7l-1 1 3.4 3.4 6-6-1-1z'/%3E%3C/svg%3E");
+      background-size: contain;
+    }
+    .tier-buy {
+      display: block;
+      text-align: center;
+      padding: 12px;
+      background: var(--text);
+      color: var(--bg);
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      transition: transform 0.15s;
+    }
+    .tier-buy:hover { transform: translateY(-1px); background: #fff; }
+    .tier.featured .tier-buy { background: var(--accent); color: #fff; }
+    .tier.featured .tier-buy:hover { background: #6cb0ff; }
+
+    /* what-you-get */
+    .wyg-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-top: 32px; }
+    .wyg-card {
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .wyg-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+    .wyg-card p { font-size: 14px; color: var(--text-dim); }
+    .wyg-card .ico {
+      width: 36px; height: 36px;
+      background: var(--accent-soft);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 16px;
+      color: var(--accent);
+      font-size: 18px;
+    }
+
+    /* trust */
+    .trust-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 32px;
+    }
+    .trust-stat .num {
+      font-size: 36px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+    .trust-stat .lab { font-size: 13px; color: var(--text-mute); margin-top: 4px; }
+
+    /* code block */
+    .codeblock {
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px 24px;
+      overflow-x: auto;
+      font-size: 13px;
+      color: #d4d4d8;
+      margin-top: 24px;
+    }
+    .codeblock .cmt { color: var(--text-mute); }
+    .codeblock .kw  { color: #c084fc; }
+    .codeblock .str { color: #86efac; }
+
+    /* faq */
+    .faq details {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 22px;
+      margin-bottom: 10px;
+      background: var(--bg-elev);
+      cursor: pointer;
+    }
+    .faq summary {
+      font-weight: 500;
+      font-size: 15px;
+      list-style: none;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .faq summary::-webkit-details-marker { display: none; }
+    .faq summary::after { content: '+'; color: var(--text-mute); font-size: 22px; font-weight: 300; transition: transform 0.2s; }
+    .faq details[open] summary::after { transform: rotate(45deg); }
+    .faq p { color: var(--text-dim); font-size: 14px; margin-top: 12px; line-height: 1.65; }
+
+    /* footer */
+    footer {
+      padding: 56px 0 40px;
+      border-top: 1px solid var(--border);
+      color: var(--text-mute);
+      font-size: 13px;
+    }
+    footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+    footer a { color: var(--text-dim); text-decoration: none; margin-left: 20px; transition: color 0.15s; }
+    footer a:hover { color: var(--text); }
+    footer .mono { color: var(--text-mute); font-size: 12px; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="brand">tom<span class="dot">.</span>smart</div>
+    <div class="nav-links">
+      <a href="#pricing">pricing</a>
+      <a href="#what">what's inside</a>
+      <a href="#faq">FAQ</a>
+      <a href="https://github.com/smartflowproai-lang/x402-saas-starter" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="pill"><span class="live-dot"></span> live on Base mainnet</div>
+    <h1><span class="grad">Ship an x402-monetized API in under 60 minutes.</span></h1>
+    <p class="sub">Production-tested middleware. CDP facilitator + EIP-3009 USDC verification. Pay with crypto, download the kit instantly — no signup, no KYC, no platform fees.</p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="#pricing">Get the starter</a>
+      <a class="btn btn-ghost" href="https://github.com/smartflowproai-lang/x402-saas-starter" target="_blank" rel="noopener">View on GitHub</a>
+    </div>
+    <div class="trust-row">
+      <span>USDC on Base</span>
+      <span>CDP facilitator</span>
+      <span>MIT-licensed core</span>
+      <span>shipped by an x402 builder</span>
+    </div>
+  </div>
+</header>
+
+<section id="pricing">
+  <div class="wrap">
+    <span class="section-label">pricing</span>
+    <h2 class="section-title">Pay once. Download. Ship.</h2>
+    <p class="section-sub">Three tiers, one currency. Each purchase mints a single-use signed download URL valid for 24h.</p>
+
+    <div class="tiers">
+
+      <div class="tier">
+        <div class="tier-name">Intro</div>
+        <div class="tier-price">$49<span class="unit">USDC</span></div>
+        <div class="tier-tag">starter kit, 1 license</div>
+        <ul>
+          <li>FastAPI server + x402 v0.5 middleware</li>
+          <li>One example endpoint, fully wired</li>
+          <li>CDP facilitator integration</li>
+          <li>EIP-3009 USDC verify + settle</li>
+          <li>Postgres schema (Drizzle migrations)</li>
+          <li>14-day email support</li>
+        </ul>
+        <a class="tier-buy" href="/buy/intro">Buy Intro</a>
+      </div>
+
+      <div class="tier featured">
+        <div class="tier-name">Standard</div>
+        <div class="tier-price">$99<span class="unit">USDC</span></div>
+        <div class="tier-tag">4 endpoints, 30-day support</div>
+        <ul>
+          <li>Everything in Intro</li>
+          <li>4 example endpoints (decision, scraping, signal-feed, custom)</li>
+          <li>Solana wallet auth scaffold</li>
+          <li>SQLite purchase log</li>
+          <li>Signed URL generator (R2-ready)</li>
+          <li>30-day email support</li>
+        </ul>
+        <a class="tier-buy" href="/buy/std">Buy Standard</a>
+      </div>
+
+      <div class="tier">
+        <div class="tier-name">Pro Bundle</div>
+        <div class="tier-price">$199<span class="unit">USDC</span></div>
+        <div class="tier-tag">production bundle, 90-day support</div>
+        <ul>
+          <li>Everything in Standard</li>
+          <li>3 MCP server templates (mapper, signal, agent)</li>
+          <li>Skill packs for common flows</li>
+          <li>Private Discord channel (Month 2)</li>
+          <li>Monitoring + rollback playbook</li>
+          <li>90-day email support</li>
+        </ul>
+        <a class="tier-buy" href="/buy/pro">Buy Pro</a>
+      </div>
+
+    </div>
+
+    <p style="font-size:13px;color:var(--text-mute);margin-top:32px;text-align:center">
+      USDC settles on Base to <code class="mono">0xd779…58C893</code>. Receipts on-chain. Refund window: first 48h, contact via X.
+    </p>
+  </div>
+</section>
+
+<section id="what">
+  <div class="wrap">
+    <span class="section-label">what you get</span>
+    <h2 class="section-title">Production code, not a tutorial.</h2>
+    <p class="section-sub">Lifted from working x402 endpoints serving live traffic. Battle-tested against the CDP facilitator, EIP-3009 USDC, Base mainnet.</p>
+
+    <div class="wyg-grid">
+      <div class="wyg-card">
+        <div class="ico">⚙</div>
+        <h3>x402 middleware</h3>
+        <p>Drop-in FastAPI dependency. Builds the 402 challenge, decodes the X-PAYMENT header, calls /verify, returns 200 on settle.</p>
+      </div>
+      <div class="wyg-card">
+        <div class="ico">🔒</div>
+        <h3>Signed download URLs</h3>
+        <p>HMAC-SHA256 tokens. Single-use nonce tracking. 24-hour TTL. In-memory by default, Redis swap-in for production.</p>
+      </div>
+      <div class="wyg-card">
+        <div class="ico">💳</div>
+        <h3>CDP facilitator client</h3>
+        <p>Async httpx client for /verify and /settle. Bearer token auth out of the box, HMAC swap documented in DEPLOY.md.</p>
+      </div>
+      <div class="wyg-card">
+        <div class="ico">📦</div>
+        <h3>Three pricing tiers</h3>
+        <p>Intro $49, Standard $99, Pro $199. Configured in code, easy to remap. Each tier serves a separate zip from R2.</p>
+      </div>
+      <div class="wyg-card">
+        <div class="ico">🐳</div>
+        <h3>Docker + uvicorn</h3>
+        <p>Single Dockerfile, deploy anywhere. App Platform, Fly.io, Render, your own VPS — all documented.</p>
+      </div>
+      <div class="wyg-card">
+        <div class="ico">🧪</div>
+        <h3>Smoke tests included</h3>
+        <p>pytest suite covers the 402 challenge shape, signed URL HMAC, single-use semantics, env validation.</p>
+      </div>
+    </div>
+
+    <div class="codeblock mono">
+<span class="cmt"># clone, configure, run — three commands</span>
+git clone https:<span class="cmt">//</span>github.com/smartflowproai-lang/x402-saas-starter
+cp .env.example .env  <span class="cmt"># set DOWNLOAD_SECRET + CDP_API_KEY</span>
+uvicorn server:app --port 8000
+
+<span class="cmt"># fetch the 402 challenge</span>
+curl -i http:<span class="cmt">//</span>localhost:8000/buy/intro
+<span class="cmt"># → 402 Payment Required + x402 v0.5 accepts[] body</span>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <span class="section-label">trust</span>
+    <h2 class="section-title">Why ship with this kit?</h2>
+    <p class="section-sub">Built by a working x402 operator, not a tutorial farm. Same middleware powers live mainnet endpoints today.</p>
+
+    <div class="trust-grid">
+      <div class="trust-stat">
+        <div class="num">x402 v0.5</div>
+        <div class="lab">protocol version</div>
+      </div>
+      <div class="trust-stat">
+        <div class="num">Base mainnet</div>
+        <div class="lab">USDC settlement</div>
+      </div>
+      <div class="trust-stat">
+        <div class="num">MIT core</div>
+        <div class="lab">free middleware fork</div>
+      </div>
+      <div class="trust-stat">
+        <div class="num">~60 min</div>
+        <div class="lab">clone → first 402</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="faq" class="faq">
+  <div class="wrap">
+    <span class="section-label">FAQ</span>
+    <h2 class="section-title">Things buyers ask first.</h2>
+    <p class="section-sub">If your question isn't here, ping <a href="https://twitter.com/TomSmart_ai" style="color:var(--accent);text-decoration:none">@TomSmart_ai</a>.</p>
+
+    <details>
+      <summary>How do I pay if I don't have USDC on Base?</summary>
+      <p>Bridge ETH from Ethereum mainnet via Superbridge (5-10 min), then swap to USDC on Uniswap Base. The README has a step-by-step. Coinbase users can also withdraw USDC directly to Base from the exchange UI for zero fees.</p>
+    </details>
+
+    <details>
+      <summary>What stack does the starter target?</summary>
+      <p>Python 3.12 + FastAPI on the server side. The middleware is pure Python with pydantic models — no Node.js required. Postgres schema ships as Drizzle migrations for buyers who prefer TS tooling alongside.</p>
+    </details>
+
+    <details>
+      <summary>Is the core middleware really MIT?</summary>
+      <p>Yes. The middleware module is MIT-licensed and the source lives on GitHub. The paid tiers add example endpoints, Solana auth, deploy playbooks, MCP server templates — production glue, not the protocol primitive.</p>
+    </details>
+
+    <details>
+      <summary>Can I self-host the facilitator instead of CDP?</summary>
+      <p>Yes. Leave CDP_API_KEY unset and point FACILITATOR_URL at your own /verify and /settle endpoints. The middleware speaks the standard x402 v0.5 envelope — any compliant facilitator works.</p>
+    </details>
+
+    <details>
+      <summary>What's in the Pro Bundle's MCP servers?</summary>
+      <p>Three Model Context Protocol server templates: a mapper-style catalog server, a signal-feed reader, an agent-coordination scaffold. Each ships with manifest, tools, and a working sample. Drop into Claude Desktop or Cursor in minutes.</p>
+    </details>
+
+    <details>
+      <summary>What if the kit doesn't work for me?</summary>
+      <p>Refund window is 48 hours from purchase — DM <a href="https://twitter.com/TomSmart_ai" style="color:var(--accent);text-decoration:none">@TomSmart_ai</a> with the tx hash and reason. Refunds settle in USDC back to the paying wallet.</p>
+    </details>
+
+    <details>
+      <summary>Why no Stripe, no PayPal, no LemonSqueezy?</summary>
+      <p>This kit is x402-native by design. Crypto buyers are the audience, and shipping a crypto product behind a fiat gateway felt like a contradiction. Fiat rails may come later; today the rail is USDC on Base.</p>
+    </details>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <div class="brand">tom<span class="dot">.</span>smart</div>
+      <div class="mono" style="margin-top:6px">© 2026 · MIT core · ships on Base</div>
+    </div>
+    <div>
+      <a href="https://twitter.com/TomSmart_ai" target="_blank" rel="noopener">@TomSmart_ai</a>
+      <a href="https://basescan.org/address/0xd779cE46567d21b9918F24f0640cA5Ad6058C893" target="_blank" rel="noopener">tomsmart.base.eth</a>
+      <a href="https://github.com/smartflowproai-lang/x402-saas-starter" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://smartflowproai.substack.com" target="_blank" rel="noopener">Substack</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
