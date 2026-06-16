@@ -6,6 +6,8 @@ Pay-per-download via x402 micropayments on Base. No Stripe, no Lemon Squeezy, no
 
 This repo is the MIT core. Three paid tiers ship the production glue on top.
 
+> **Note:** "No signup / no platform account required" means no SmartFlow account is needed to buy — it does **not** mean anonymity or avoidance of accounting, tax, sanctions or compliance obligations. SmartFlow records its own orders and payments for its own software/data sales, and does not operate payment processing, custody, exchange, wallet, facilitator or settlement services for customers.
+
 ---
 
 ## Buy a tier
