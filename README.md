@@ -53,15 +53,17 @@ This repo is the MIT core. Three paid tiers ship the production glue on top.
 
 ## Why x402 (not Stripe)
 
-This is a crypto product for crypto builders. Shipping it behind a fiat gateway felt wrong.
+This kit ships natively on x402 rather than behind a fiat gateway, because it's built for teams already working with x402.
 
 - USDC on Base, full stop
 - On-chain receipts (Basescan visible)
 - Refunds return to the buying wallet
-- No signup, no KYC, no platform fees, no chargeback risk
+- No signup, no platform account, no platform fees, no chargeback risk
 - 48h no-questions refund window
 
 If you're already shipping on x402 (Bankr, Dexter, Mogami) and you want visibility into your payment flows, this kit gets you there in one evening.
+
+**Scope.** This is self-hosted developer software: you install and run it in your own environment and configure your own recipient wallet. SmartFlow sells the kit as its own product and does not operate payment processing, custody, exchange, wallet, facilitator or settlement services for customers.
 
 ---
 
